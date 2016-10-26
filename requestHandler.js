@@ -1,5 +1,7 @@
 var querystring=require('querystring');
-function start(res,postData){
+var fs=require('fs');
+var formidable=require('formidable')
+function start(res,req){
   console.log('start模块开启')
   var body ='<html>'+
     '<head>'+
@@ -7,9 +9,9 @@ function start(res,postData){
     'charset=UTF-8" />'+
     '</head>'+
     '<body>'+
-    '<form action="/upload" method="post">'+
-    '<textarea name="text" rows="20" cols="60"></textarea>'+
-    '<input type="submit" value="Submit text" />'+
+    '<form action="/upload" method="post" enctype="multipart/form-data">'+
+    '<input type="file" name="myimage"/>'+
+    '<input type="submit" value="upload file" />'+
     '</form>'+
     '</body>'+
     '</html>';
@@ -17,11 +19,33 @@ function start(res,postData){
   res.write(body)
   res.end()
 }
-function upload(res,postData){
+function upload(res,req){
   console.log('upload模块开启')
-  res.writeHead(200,{'Content-Type':'text/plain'})
-  res.write('you have sent:  '+querystring.parse(postData).text)
-  res.end()
+  var form=new formidable.IncomingForm();
+  console.log('begin to parse file')
+  form.parse(req,function(error,fileds,files){
+    console.log('parsing done')
+    fs.renameSync(files.myimage.path,"./tmp/test.jpeg");
+    res.writeHead(200,{"Content-Type":"text/html"});
+    res.write("received image:<br/>");
+    res.write("<img src='/show' />");
+    res.end();
+  })
+}
+function show(res,req){
+  console.log('show模块开启')
+  fs.readFile('./tmp/test.jpeg','binary',function(err,file){
+    if(err){
+      res.writeHead(500,{'Content-Type':'text/plain'})
+      res.write(err+'\n')
+      res.end()
+    }else{
+      res.writeHead(200,{'Content-Type':'image/jpeg'})
+      res.write(file,'binary')
+      res.end()
+    }
+  })
 }
 exports.start=start;
+exports.show=show;
 exports.upload=upload;
