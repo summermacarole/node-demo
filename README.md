@@ -3,6 +3,8 @@
 # 前提
 * 安装nodejs必须
 * 安装node-dev(非必需)  
+
+
 #运行
 1. 下载该文件夹下所有文件  
 2. 在根目录下运行node index.js 或者node-dev index.js   
